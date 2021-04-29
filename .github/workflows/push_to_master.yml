@@ -58,3 +58,29 @@ jobs:
     - name: Terraform Apply
       run: terraform apply -auto-approve
       working-directory: ${{ env.working-directory }}
+
+  check:
+    name: 'Check'
+    needs: 'Terraform'
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      ARM_TENANT_ID: 3f896bab-4764-4495-bd57-4c63e460302b
+      ARM_SUBSCRIPTION_ID: 785c8861-1a26-4cf3-a8c3-1b9ac6bea47b
+      ARM_CLIENT_ID: 7fb93334-df5d-4aa9-af16-26a9796778d2
+      ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+
+    # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+    # Checkout the repository to the GitHub Actions runner
+    - name: Checkout
+      uses: actions/checkout@v2
+    
+    - name: Azure login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
