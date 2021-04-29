@@ -90,6 +90,7 @@ jobs:
 
   build:
     name: 'Build'
+    needs: 'Terraform'
     runs-on: ubuntu-latest
     environment: production
     env:
