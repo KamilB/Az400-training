@@ -99,6 +99,7 @@ jobs:
       ARM_CLIENT_ID: 7fb93334-df5d-4aa9-af16-26a9796778d2
       ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
       dotnet: '3.1.x'
+      path_web: './Az400api'
 
     # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
     defaults:
@@ -118,7 +119,7 @@ jobs:
     - name: build
       run: |
         dotnet build .
-        dotnet publish ./Az400api -c Release -o 'release/myapp' 
+        dotnet publish -c Release -o '${{ env.path_web }}/myapp' 
 
     - name: test
       run: |
@@ -146,11 +147,6 @@ jobs:
       uses: azure/webapps-deploy@v2
       with:
         app-name: 'WebApp-az400-code'
-        package:  'release/myapp'
+        package:  '${{ env.path_web }}/myapp'
 
     
-    - name: Update image tag on the Azure Web App
-      uses: azure/webapps-container-deploy@v1
-      with:
-        app-name: 'WebApp-az400-code'
-        images: 'az400testApril.azurecr.io/az400api:latest' 
