@@ -20,7 +20,14 @@ resource "azurerm_app_service" "az400app_service" {
   resource_group_name = azurerm_resource_group.az400terraform.name
   app_service_plan_id = azurerm_app_service_plan.az400serviceplan.id
 
-  #  app_settings = {
-  #   "APPINSIGHTS_INSTRUMENTATIONKEY" = azurerm_application_insights.app_insigts.instrumentation_key
-  # }
+   app_settings = {
+    "APPINSIGHTS_INSTRUMENTATIONKEY" = azurerm_application_insights.az400insigts.instrumentation_key
+  }
+}
+
+resource "azurerm_application_insights" "az400insigts" {
+  name                = "tf-test-appinsights"
+  location            = azurerm_resource_group.az400terraform.location
+  resource_group_name = azurerm_resource_group.az400terraform.name
+  application_type    = "web"
 }
