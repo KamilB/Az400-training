@@ -25,6 +25,16 @@ resource "azurerm_app_service" "az400app_service" {
   app_settings = {
     "APPINSIGHTS_INSTRUMENTATIONKEY" = azurerm_application_insights.az400insigts.instrumentation_key
   }
+
+  site_config = {
+    linux_fx_version = "DOCKER|appsvcsample/python-helloworld:0.1.2"
+  }
+
+  lifecycle {
+    ignore_changes = [
+      "site_config.0.linux_fx_version", # deployments are made outside of Terraform
+    ]
+  }
 }
 
 resource "azurerm_application_insights" "az400insigts" {
