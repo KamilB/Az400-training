@@ -146,4 +146,11 @@ jobs:
       uses: azure/webapps-deploy@v2
       with:
         app-name: 'WebApp-az400-code'
-        package:  'release/myapp' 
+        package:  'release/myapp'
+
+    
+    - name: Update image tag on the Azure Web App
+      uses: azure/webapps-container-deploy@v1
+      with:
+        app-name: 'WebApp-az400-code'
+        images: 'az400testApril.azurecr.io/az400api:latest' 
