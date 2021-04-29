@@ -15,7 +15,7 @@ resource "azurerm_app_service_plan" "az400serviceplan" {
 }
 
 resource "azurerm_app_service" "az400app_service" {
-  name                = "WebApp"
+  name                = "WebApp-az400"
   location            = azurerm_resource_group.az400terraform.location
   resource_group_name = azurerm_resource_group.az400terraform.name
   app_service_plan_id = azurerm_app_service_plan.az400serviceplan.id
