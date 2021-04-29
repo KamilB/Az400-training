@@ -31,6 +31,13 @@ resource "azurerm_app_service" "az400app_service" {
   }
 }
 
+resource "azurerm_app_service" "az400app_service_code" {
+  name                = "WebApp-az400-code"
+  location            = azurerm_resource_group.az400terraform.location
+  resource_group_name = azurerm_resource_group.az400terraform.name
+  app_service_plan_id = azurerm_app_service_plan.az400serviceplan.id
+}
+
 resource "azurerm_application_insights" "az400insigts" {
   name                = "tf-test-appinsights"
   location            = azurerm_resource_group.az400terraform.location

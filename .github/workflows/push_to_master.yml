@@ -118,6 +118,7 @@ jobs:
     - name: build
       run: |
         dotnet build .
+        dotnet publish -c Release -o 'release/myapp' 
 
     - name: test
       run: |
@@ -144,5 +145,5 @@ jobs:
     - name: Deploy
       uses: azure/webapps-deploy@v2
       with:
-        app-name: 'WebApp-az400'
-        images: 'az400testApril.azurecr.io/az400api'
+        app-name: 'WebApp-az400-code'
+        package:  'release/myapp' 
