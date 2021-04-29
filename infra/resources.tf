@@ -8,6 +8,7 @@ resource "azurerm_app_service_plan" "az400serviceplan" {
   location            = azurerm_resource_group.az400terraform.location
   resource_group_name = azurerm_resource_group.az400terraform.name
   kind                = "Linux"
+  reserved            = true
 
   sku {
     tier = "Standard"
@@ -24,6 +25,17 @@ resource "azurerm_app_service" "az400app_service" {
   app_settings = {
     "APPINSIGHTS_INSTRUMENTATIONKEY" = azurerm_application_insights.az400insigts.instrumentation_key
   }
+
+  site_config {
+    linux_fx_version = "DOCKER|appsvcsample/python-helloworld:0.1.2"
+  }
+}
+
+resource "azurerm_app_service" "az400app_service_code" {
+  name                = "WebApp-az400-code"
+  location            = azurerm_resource_group.az400terraform.location
+  resource_group_name = azurerm_resource_group.az400terraform.name
+  app_service_plan_id = azurerm_app_service_plan.az400serviceplan.id
 }
 
 resource "azurerm_application_insights" "az400insigts" {
