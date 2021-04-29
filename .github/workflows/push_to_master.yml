@@ -118,7 +118,7 @@ jobs:
     - name: build
       run: |
         dotnet build .
-        dotnet publish -c Release -o 'release/myapp' 
+        dotnet publish ./Az400api -c Release -o 'release/myapp' 
 
     - name: test
       run: |
