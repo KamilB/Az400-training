@@ -124,3 +124,16 @@ jobs:
     - name: test
       run: |
         dotnet test .
+
+    - name: Login to ACR
+      uses: azure/docker-login@v1
+      with:
+        login-server: az400testApril.azurecr.io
+        username: ${{ secrets.ACR_USERNAME }}
+        password: ${{ secrets.ACR_PASSWORD }}
+
+    - name: Tag and push image
+      run: |
+        cd ./Az400api
+        docker build . -t az400testApril.azurecr.io/az400api:${{ github.sha }}
+        docker push az400testApril.azurecr.io/az400api:${{ github.sha }}
