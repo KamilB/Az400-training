@@ -119,11 +119,18 @@ jobs:
     - name: build
       run: |
         dotnet build .
+        dotnet publish -c Release -o '${{ env.path_web }}/myapp' 
         
 
     - name: test
       run: |
         dotnet test .
+
+    - name: Deploy
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: 'WebApp-az400-code'
+        package:  '${{ env.path_web }}/myapp'
 
     - name: Login to ACR
       uses: azure/docker-login@v1
