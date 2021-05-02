@@ -154,4 +154,4 @@ jobs:
       uses: azure/webapps-deploy@v2
       with:
         app-name: 'WebApp-az400'
-        images:  'az400testApril.azurecr.io/az400api:latest'
+        images:  'az400testApril.azurecr.io/az400api:${{ github.sha }}'
