@@ -135,22 +135,3 @@ jobs:
       with:
         app-name: 'WebApp-az400-code'
         package:  '${{ env.path_web }}/myapp'
-
-    - name: Login to ACR
-      uses: azure/docker-login@v1
-      with:
-        login-server: az400testApril.azurecr.io
-        username: ${{ secrets.ACR_USERNAME }}
-        password: ${{ secrets.ACR_PASSWORD }}
-
-    - name: Tag and push image
-      run: |
-        cd ./Az400api
-        docker build . -t az400testApril.azurecr.io/az400api:${{ github.sha }}
-        docker push az400testApril.azurecr.io/az400api:${{ github.sha }}
-
-    - name: Deploy
-      uses: azure/webapps-deploy@v2
-      with:
-        app-name: 'WebApp-az400'
-        images:  'az400testApril.azurecr.io/az400api:${{ github.sha }}'
