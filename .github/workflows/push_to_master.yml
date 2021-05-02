@@ -1,0 +1,157 @@
+name: 'Infra & code'
+
+on:
+  push:
+    branches:
+    - master
+  pull_request:   #storage account,service principal (sdk),folder infra,konfiguracja env ,terraform init
+    
+
+jobs:
+  terraform:
+    name: 'Terraform'
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      ARM_TENANT_ID: 3f896bab-4764-4495-bd57-4c63e460302b
+      ARM_SUBSCRIPTION_ID: 785c8861-1a26-4cf3-a8c3-1b9ac6bea47b
+      ARM_CLIENT_ID: 7fb93334-df5d-4aa9-af16-26a9796778d2
+      ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+      ARM_ACCESS_KEY: ${{ secrets.TF_ARM_ACCESS_KEY }}
+      working-directory: ./infra
+
+    # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+    # Checkout the repository to the GitHub Actions runner
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v1
+
+
+    # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
+    - name: Terraform Init
+      run: |
+        terraform init \
+        -backend-config="storage_account_name=az400terraform" \
+        -backend-config="container_name=az400terraform" \
+        -backend-config="key=infra.az400terraform" 
+      working-directory: ${{ env.working-directory }}
+
+    # # Checks that all Terraform configuration files adhere to a canonical format
+    - name: Terraform Format
+      run: terraform fmt -check
+      working-directory: ${{ env.working-directory }}
+
+    # # Generates an execution plan for Terraform
+    - name: Terraform Plan
+      run: terraform plan
+      working-directory: ${{ env.working-directory }}
+
+
+    - name: Terraform Apply
+      run: terraform apply -auto-approve
+      working-directory: ${{ env.working-directory }}
+
+  check:
+    name: 'Check'
+    needs: 'Terraform'
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      ARM_TENANT_ID: 3f896bab-4764-4495-bd57-4c63e460302b
+      ARM_SUBSCRIPTION_ID: 785c8861-1a26-4cf3-a8c3-1b9ac6bea47b
+      ARM_CLIENT_ID: 7fb93334-df5d-4aa9-af16-26a9796778d2
+      ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+
+    # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+    # Checkout the repository to the GitHub Actions runner
+    - name: Checkout
+      uses: actions/checkout@v2
+    
+    - name: Azure login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+    
+    - name: Check plans
+      run: az appservice plan list
+
+  build:
+    name: 'Build'
+    needs: 'Check'
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      ARM_TENANT_ID: 3f896bab-4764-4495-bd57-4c63e460302b
+      ARM_SUBSCRIPTION_ID: 785c8861-1a26-4cf3-a8c3-1b9ac6bea47b
+      ARM_CLIENT_ID: 7fb93334-df5d-4aa9-af16-26a9796778d2
+      ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+      dotnet: '3.1.x'
+      path_web: './Az400api'
+
+    # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+    # Checkout the repository to the GitHub Actions runner
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: ${{ env.dotnet }} 
+
+    - name: build
+      run: |
+        dotnet build .
+        dotnet publish -c Release -o '${{ env.path_web }}/myapp' 
+        
+
+    - name: test
+      run: |
+        dotnet test .
+
+    - name: Azure login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Deploy
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: 'WebApp-az400-code'
+        package:  '${{ env.path_web }}/myapp'
+
+    - name: Login to ACR
+      uses: azure/docker-login@v1
+      with:
+        login-server: az400testApril.azurecr.io
+        username: ${{ secrets.ACR_USERNAME }}
+        password: ${{ secrets.ACR_PASSWORD }}
+
+    - name: Tag and push image
+      run: |
+        cd ./Az400api
+        docker build . -t az400testApril.azurecr.io/az400api:${{ github.sha }}
+        docker push az400testApril.azurecr.io/az400api:${{ github.sha }}
+
+    - name: Deploy
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: 'WebApp-az400'
+        images:  'az400testApril.azurecr.io/az400api:latest'
