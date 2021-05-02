@@ -149,8 +149,11 @@ jobs:
         docker build . -t az400testApril.azurecr.io/az400api:${{ github.sha }}
         docker push az400testApril.azurecr.io/az400api:${{ github.sha }}
 
-    - name: Deploy
-      uses: azure/webapps-deploy@v2
+    - name: Deploy     # akcja nie dziala poprawnie - u mnie pojawia sie application error,a gdy wejde w mojego app service (zakladka deployment center) widze ze obraz jest ustawiony dobrze ale "server url" jest pusty. 
+      uses: azure/webapps-deploy@v2 #Gdy go wypelnie recznie aplikacja dziala. Wniosek - ta akcja albo moze gdzies przyjac ten server url jako parametr (ale w kodzie go nie widze) albo ma buga. Jesli sie cos dowiem dam znac;)
       with:
         app-name: 'WebApp-az400'
         images:  'az400testApril.azurecr.io/az400api:${{ github.sha }}'
+
+
+
