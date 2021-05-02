@@ -4,8 +4,7 @@ on:
   push:
     branches:
     - master
-  pull_request:   #storage account,service principal (sdk),folder infra,konfiguracja env ,terraform init
-    
+  pull_request:   
 
 jobs:
   terraform:
