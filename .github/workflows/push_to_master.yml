@@ -126,6 +126,11 @@ jobs:
       run: |
         dotnet test .
 
+    - name: Azure login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
     - name: Deploy
       uses: azure/webapps-deploy@v2
       with:
@@ -144,11 +149,6 @@ jobs:
         cd ./Az400api
         docker build . -t az400testApril.azurecr.io/az400api:${{ github.sha }}
         docker push az400testApril.azurecr.io/az400api:${{ github.sha }}
-
-    - name: Azure login
-      uses: azure/login@v1
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
 
     - name: Deploy
       uses: azure/webapps-deploy@v2
